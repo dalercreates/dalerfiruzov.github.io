@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daler Firuzov — Director of Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c0e;
+    --bg-raise:#14171b;
+    --ink:#edeae3;
+    --ink-dim:#8b8f94;
+    --amber:#e8a23d;
+    --line:rgba(237,234,227,0.12);
+    --letterbox: 64px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  /* film grain texture */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    z-index:999;
+    pointer-events:none;
+    opacity:0.035;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode:overlay;
+  }
+
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- APERTURE NAV ---------- */
+  .aperture-nav{
+    position:fixed;
+    left:28px; top:0; bottom:0;
+    width:60px;
+    display:flex;
+    align-items:center;
+    z-index:100;
+  }
+  .aperture-rail{
+    position:relative;
+    height:340px;
+    width:1px;
+    background:var(--line);
+  }
+  .aperture-dot{
+    position:absolute;
+    left:50%;
+    width:8px;height:8px;
+    background:var(--amber);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    top:0%;
+    transition:top .5s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 0 12px rgba(232,162,61,.7);
+  }
+  .aperture-stop{
+    position:absolute;
+    left:14px;
+    transform:translateY(-50%);
+    display:flex;align-items:center;gap:10px;
+    cursor:pointer;
+  }
+  .aperture-stop .tick{width:10px;height:1px;background:var(--ink-dim);transition:.3s;}
+  .aperture-stop .f{font-size:11px;letter-spacing:.05em;color:var(--ink-dim);transition:.3s;white-space:nowrap;}
+  .aperture-stop .label{
+    font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);
+    writing-mode:vertical-rl;transform:rotate(180deg);
+    opacity:0;transition:.3s;
+    margin-left:2px;
+  }
+  .aperture-stop.active .tick{background:var(--amber);width:16px;}
+  .aperture-stop.active .f{color:var(--amber);}
+  .aperture-stop.active .label{opacity:1;color:var(--ink-dim);}
+
+  @media (max-width:860px){
+    .aperture-nav{display:none;}
+  }
+
+  /* ---------- LAYOUT ---------- */
+  main{margin-left:0;}
+  section{
+    padding:120px 8vw 120px calc(8vw + 60px);
+    border-bottom:1px solid var(--line);
+  }
+  @media (max-width:860px){
+    section{padding:80px 6vw;}
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    border-bottom:1px solid var(--line);
+  }
+  .letterbox-top, .letterbox-bottom{
+    position:absolute;left:0;right:0;
+    height:var(--letterbox);
+    background:#000;
+    z-index:5;
+    display:flex;align-items:center;
+    padding:0 8vw 0 calc(8vw + 60px);
+  }
+  .letterbox-top{top:0;}
+  .letterbox-bottom{bottom:0;justify-content:space-between;}
+  @media (max-width:860px){
+    .letterbox-top,.letterbox-bottom{padding:0 6vw; height:36px;}
+    :root{--letterbox:36px;}
+  }
+  .timecode{
+    font-size:12px;letter-spacing:.1em;color:var(--ink-dim);
+  }
+  .rec-dot{
+    display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:#e6533b;margin-right:8px;
+    animation:blink 1.6s infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+  .frame-meta{font-size:11px;color:var(--ink-dim);letter-spacing:.08em;}
+
+  .hero-inner{
+    padding:calc(var(--letterbox) + 40px) 8vw calc(var(--letterbox) + 40px) calc(8vw + 60px);
+    max-width:640px;
+  }
+  @media (max-width:860px){
+    .hero-inner{padding:calc(var(--letterbox) + 30px) 6vw;}
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--amber); margin-bottom:18px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(56px,8vw,108px);
+    line-height:0.92;
+    letter-spacing:.01em;
+    margin-bottom:20px;
+  }
+  .role{
+    font-size:16px;color:var(--ink-dim);max-width:38ch;line-height:1.6;margin-bottom:36px;
+  }
+  .cta{
+    display:inline-flex;align-items:center;gap:10px;
+    border:1px solid var(--amber);
+    color:var(--amber);
+    padding:14px 26px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px; letter-spacing:.08em; text-transform:uppercase;
+    transition:.25s;
+  }
+  .cta:hover{background:var(--amber);color:#0a0c0e;}
+
+  .tags{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px;}
+  .tag{
+    border:1px solid var(--line);
+    padding:7px 14px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+
+  /* ---------- SECTION HEADS ---------- */
+  .section-head{
+    display:flex;align-items:baseline;gap:16px;
+    margin-bottom:56px;
+  }
+  .section-head .stop{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--amber); font-size:14px;
+  }
+  .section-head h2{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(32px,4vw,48px);
+    letter-spacing:.02em;
+  }
+  .section-head .rule{flex:1;height:1px;background:var(--line);}
+
+  /* ---------- WORK GRID ---------- */
+  .filter-tabs{
+    display:flex;flex-wrap:wrap;gap:28px;
+    margin-bottom:40px;
+    padding-bottom:22px;
+    border-bottom:1px solid var(--line);
+  }
+  .filter-tab{
+    background:none;border:none;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-dim);
+    cursor:pointer;
+    padding:4px 0;
+    border-bottom:1px solid transparent;
+    transition:.25s;
+  }
+  .filter-tab:hover{color:var(--ink);}
+  .filter-tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+
+  .work-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:2px;
+    background:var(--line);
+  }
+  @media (max-width:860px){.work-grid{grid-template-columns:1fr;}}
+  .frame{
+    position:relative;
+    aspect-ratio:16/9;
+    background:var(--bg);
+    overflow:hidden;
+  }
+  .frame.hidden{display:none;}
+  .badge-intl{
+    position:absolute;top:12px;right:12px;
+    z-index:3;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--amber);
+    border:1px solid var(--amber);
+    padding:4px 8px;
+    background:rgba(10,12,14,.75);
+  }
+  .frame-bg{
+    position:absolute;inset:0;
+    background-size:cover;
+    background-position:center;
+    transition:transform .6s ease;
+  }
+  .frame:hover .frame-bg{transform:scale(1.06);}
+  .frame[data-playable="true"]{cursor:pointer;}
+  .play-indicator{
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:52px;height:52px;border-radius:50%;
+    border:1px solid var(--amber);
+    background:rgba(10,12,14,.55);
+    display:flex;align-items:center;justify-content:center;
+    z-index:2;
+    transition:.25s;
+  }
+  .play-indicator svg{fill:var(--amber);}
+  .frame:hover .play-indicator{background:var(--amber);}
+  .frame:hover .play-indicator svg{fill:#0a0c0e;}
+
+  .lightbox{
+    position:fixed;inset:0;
+    background:rgba(6,7,8,.94);
+    z-index:1000;
+    display:none;
+    align-items:center;justify-content:center;
+    padding:6vw;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox-inner{width:100%;max-width:1000px;aspect-ratio:16/9;position:relative;}
+  .lightbox-inner iframe{width:100%;height:100%;border:0;}
+  .lightbox-close{
+    position:absolute;top:24px;right:28px;
+    background:none;border:1px solid var(--line);
+    color:var(--ink);width:40px;height:40px;
+    font-family:'JetBrains Mono',monospace;font-size:14px;
+    cursor:pointer;z-index:1001;transition:.2s;
+  }
+  .lightbox-close:hover{border-color:var(--amber);color:var(--amber);}
+  .sprocket{
+    position:absolute;left:0;right:0;height:10px;
+    background:repeating-linear-gradient(90deg,#000 0 6px, transparent 6px 16px);
+    opacity:.5; z-index:2;
+  }
+  .sprocket.top{top:0;} .sprocket.bottom{bottom:0;}
+  .slate{
+    position:absolute;inset:0;
+    background:rgba(10,12,14,.82);
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:22px;
+    opacity:0;transition:opacity .3s;
+  }
+  .frame:hover .slate{opacity:1;}
+  .slate .cat{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;}
+  .slate h3{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.01em;margin-bottom:6px;}
+  .slate .specs{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);}
+
+  /* ---------- CONTACT ---------- */
+  .contact{border-bottom:none;}
+  .contact-inner{
+    display:flex;flex-direction:column;align-items:flex-start;gap:36px;
+  }
+  .contact h2.big{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(40px,6vw,80px);
+    line-height:1;
+    max-width:14ch;
+  }
+  .contact h2.big a{border-bottom:2px solid var(--amber);}
+  .contact h2.big a:hover{color:var(--amber);}
+  .contact-links{
+    display:flex;gap:32px;flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  .contact-links a{color:var(--ink-dim);border-bottom:1px solid transparent;}
+  .contact-links a:hover{color:var(--amber);border-color:var(--amber);}
+  footer{
+    padding:28px 8vw 28px calc(8vw + 60px);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;color:var(--ink-dim);
+    display:flex;justify-content:space-between;
+  }
+  @media (max-width:860px){
+    footer{padding:24px 6vw;flex-direction:column;gap:8px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ APERTURE NAVIGATION (lens ring, current stop = current section) ============ -->
+<nav class="aperture-nav">
+  <div class="aperture-rail" id="rail">
+    <div class="aperture-dot" id="rail-dot"></div>
+    <div class="aperture-stop" data-target="reel" style="top:0%;">
+      <div class="tick"></div><div class="f mono">f/1.4</div><div class="label">START</div>
+    </div>
+    <div class="aperture-stop" data-target="work" style="top:50%;">
+      <div class="tick"></div><div class="f mono">f/2.8</div><div class="label">WORK</div>
+    </div>
+    <div class="aperture-stop" data-target="contact" style="top:100%;">
+      <div class="tick"></div><div class="f mono">f/11</div><div class="label">CONTACT</div>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="reel">
+    <div class="letterbox-top">
+      <span class="frame-meta mono"><span class="rec-dot"></span>REC · 24 FPS · 2.39:1</span>
+    </div>
+
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">Director of Photography</div>
+        <h1>DALER<br>FIRUZOV</h1>
+        <div class="tags">
+          <span class="tag">Concerts</span>
+          <span class="tag">Reels</span>
+          <span class="tag">Commercial</span>
+          <span class="tag">Music Videos</span>
+          <span class="tag">Documentary</span>
+          <span class="tag">International</span>
+        </div>
+        <a class="cta" href="#work">See the work ↓</a>
+      </div>
+    </div>
+
+    <div class="letterbox-bottom">
+      <span class="timecode mono" id="timecode">00:00:00:00</span>
+    </div>
+  </section>
+
+  <!-- ============ WORK ============ -->
+  <section id="work">
+    <div class="section-head">
+      <span class="stop mono">f/2.8</span>
+      <h2>Work</h2>
+      <div class="rule"></div>
+    </div>
+
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="Documentary">Documentary</button>
+      <button class="filter-tab" data-filter="Sport">Sport</button>
+      <button class="filter-tab" data-filter="Music Video">Music Videos</button>
+    </div>
+
+    <div class="work-grid" id="workGrid"></div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="contact" id="contact">
+    <div class="section-head">
+      <span class="stop mono">f/11</span>
+      <h2>Contact</h2>
+      <div class="rule"></div>
+    </div>
+
+    <div class="contact-inner">
+      <h2 class="big"><a href="mailto:dalercreates@gmail.com">dalercreates@gmail.com</a></h2>
+      <div class="contact-links">
+        <a href="https://t.me/dalercreates" target="_blank">Telegram</a>
+        <a href="https://www.instagram.com/dalercreates/" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© <span id="year"></span> Daler Firuzov</span>
+    <span>Director of Photography</span>
+  </footer>
+
+</main>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">✕</button>
+  <div class="lightbox-inner" id="lightboxInner"></div>
+</div>
+
+<script>
+  // ---------- PROJECTS: replace with your own work ----------
+  // For a real video, add videoId (the part after v= or after youtu.be/ in the YouTube link).
+  const projects = [
+    {title:"FIE Congress — Manama, Bahrain", cat:"Documentary", specs:"Documentary · International", videoId:"RVW0QhmrK4c", intl:true},
+    {title:"Documentary Short 1", cat:"Documentary", specs:"9:16 · Documentary", videoId:"jevDc_km0ec"},
+    {title:"Documentary Short 2", cat:"Documentary", specs:"9:16 · Documentary", videoId:"VXb2t2ypJh8"},
+    {title:"Documentary Short 3", cat:"Documentary", specs:"9:16 · Documentary", videoId:"PTRVWQurr34"},
+    {title:"International Fencing Federation", cat:"Sport", specs:"Sport · International", videoId:"hjQL6OOdySI", intl:true},
+    {title:"Orléans Grand Prix", cat:"Sport", specs:"Sport · International", videoId:"_4X58bJnB-Y", intl:true},
+    {title:"DAM — AAABAGNALE", cat:"Music Video", specs:"Music Video", videoId:"ASKUphEork8"},
+    {title:"Birak — Anıl Emre Daldal & Merve Karagöz", cat:"Music Video", specs:"Music Video", videoId:"BBj3M2t5eu4"},
+    {title:"Shokir — Formula 1", cat:"Music Video", specs:"Music Video", videoId:"jX-doqAEWhQ"},
+    {title:"Qabila Mag — Live", cat:"Music Video", specs:"Music Video", videoId:"Vk9ac_QK5xc"},
+    {title:"TAHOE — Uchitayy", cat:"Music Video", specs:"Music Video", videoId:"AMwBUlJpJ1s"},
+  ];
+
+  const grid = document.getElementById('workGrid');
+  projects.forEach(p=>{
+    const el = document.createElement('div');
+    el.className = 'frame';
+    el.dataset.cat = p.cat;
+    const bg = p.videoId
+      ? `background-image:url(https://img.youtube.com/vi/${p.videoId}/maxresdefault.jpg)`
+      : `background:${p.grad}`;
+    if(p.videoId) el.dataset.playable = 'true';
+    el.innerHTML = `
+      <div class="sprocket top"></div>
+      <div class="frame-bg" style="${bg}"></div>
+      ${p.videoId ? `<div class="play-indicator"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>` : ''}
+      ${p.intl ? '<div class="badge-intl">International</div>' : ''}
+      <div class="slate">
+        <div class="cat mono">${p.cat}</div>
+        <h3>${p.title}</h3>
+        <div class="specs">${p.specs}</div>
+      </div>
+      <div class="sprocket bottom"></div>
+    `;
+    if(p.videoId){
+      el.addEventListener('click', ()=>openLightbox(p.videoId));
+    }
+    grid.appendChild(el);
+  });
+
+  // ---------- LIGHTBOX: plays a project's video without leaving the page ----------
+  const lightbox = document.getElementById('lightbox');
+  const lightboxInner = document.getElementById('lightboxInner');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(videoId){
+    lightboxInner.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" title="video" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    lightbox.classList.add('open');
+  }
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    lightboxInner.innerHTML = '';
+  }
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e=>{ if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeLightbox(); });
+
+  // ---------- FILTER TABS: show only the selected format ----------
+  const tabs = document.querySelectorAll('.filter-tab');
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.filter;
+      document.querySelectorAll('#workGrid .frame').forEach(f=>{
+        f.classList.toggle('hidden', filter !== 'all' && f.dataset.cat !== filter);
+      });
+    });
+  });
+
+  // ---------- TIMECODE (24 fps, runs from page load) ----------
+  const tcEl = document.getElementById('timecode');
+  const start = performance.now();
+  function pad(n){return String(n).padStart(2,'0');}
+  function tick(){
+    const elapsed = performance.now() - start;
+    const totalFrames = Math.floor(elapsed / (1000/24));
+    const ff = totalFrames % 24;
+    const totalSeconds = Math.floor(totalFrames/24);
+    const ss = totalSeconds % 60;
+    const mm = Math.floor(totalSeconds/60) % 60;
+    const hh = Math.floor(totalSeconds/3600);
+    tcEl.textContent = `${pad(hh)}:${pad(mm)}:${pad(ss)}:${pad(ff)}`;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // ---------- APERTURE NAV: active section + moving dot ----------
+  const stops = document.querySelectorAll('.aperture-stop');
+  const dot = document.getElementById('rail-dot');
+  const sections = ['reel','work','contact'].map(id=>document.getElementById(id));
+
+  stops.forEach(s=>{
+    s.addEventListener('click', ()=>{
+      document.getElementById(s.dataset.target).scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const idx = sections.findIndex(s=>s.id===entry.target.id);
+        stops.forEach(s=>s.classList.remove('active'));
+        stops[idx].classList.add('active');
+        dot.style.top = (idx/(sections.length-1))*100 + '%';
+      }
+    });
+  }, {threshold:0.5});
+  sections.forEach(s=>io.observe(s));
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
